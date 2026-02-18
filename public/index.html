@@ -47,6 +47,16 @@
             <button type="submit" class="btn btn-primary w-100">Ajouter</button>
         </form>
 
+        <!-- Recherche + Tri -->
+        <div class="mb-3 d-flex gap-2">
+            <input type="text" id="search-input" placeholder="Rechercher par nom ou prénom…" class="form-control">
+            <button id="btn-search" class="btn btn-outline-primary">Chercher</button>
+        </div>
+        <div class="mb-3 d-flex gap-2">
+            <button id="btn-sort" class="btn btn-outline-secondary flex-fill">⇅ Trier A → Z</button>
+            <button id="reset-btn" class="btn btn-outline-danger" style="display:none;">Réinitialiser</button>
+        </div>
+
         <ul id="user-list" class="list-group"></ul>
     </div>
 </div>
