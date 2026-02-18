@@ -1,35 +1,28 @@
+
 import express from "express";
 import type { Request, Response } from "express";
-import userRoutes from "./routes/userRoutes.ts"; // avec l'extension .ts
+
+import sequelize from "./config/database";
+import User from "./models/User";
+import userRoutes from "./routes/userRoutes";
 
 const app = express();
 const PORT = 3000;
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Bienvenue sur mon serveur API");
+// Middleware pour parser le JSON
+app.use(express.json());
+
+// Routes utilisateurs
+app.use("/api/users", userRoutes);
+
+// 🔹 Synchronisation des modèles + démarrage du serveur
+sequelize.sync().then(() => {
+    console.log("Base de données synchronisée !");
+    app.listen(PORT, () => {
+        console.log(`Serveur lancé sur http://localhost:${PORT}`);
+    });
 });
 
-app.get("/api/data", (req: Request, res: Response) => {
-  const etudiants = [
-    { id: 1, nom: "Dupont", prenom: "Jean" },
-    { id: 2, nom: "Martin", prenom: "Sophie" },
-    { id: 3, nom: "Doe", prenom: "John" },
-  ];
-  res.json(etudiants);
-});
-
-app.get("/api/hello/:name", (req: Request, res: Response) => {
-  const name = req.params.name;
-  const timestamp = new Date().toISOString();
-  res.json({ message: `Bonjour ${name}`, timestamp });
-});
-
-// Montage du routeur
-app.use("/api", userRoutes);
-
-app.listen(PORT, () => {
-  console.log(`Serveur démarré sur http://localhost:${PORT}`);
-});
 
 
 
