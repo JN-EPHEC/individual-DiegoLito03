@@ -1,83 +1,58 @@
-const userList = document.getElementById("userList");
-const userForm = document.getElementById("userForm");
+const userList = document.getElementById("user-list");
+const userForm = document.getElementById("user-form");
+const prenomInput = document.getElementById("prenom");
+const nomInput = document.getElementById("nom");
 
-// Charger les utilisateurs au démarrage
 document.addEventListener("DOMContentLoaded", () => {
     loadUsers();
 });
 
-// =============================
-// Charger et afficher utilisateurs
-// =============================
 async function loadUsers() {
-    const response = await fetch("/api/users");
-    const users = await response.json();
+    try {
+        const res = await fetch("/api/users");
+        const users = await res.json();
 
-    userList.innerHTML = "";
+        userList.innerHTML = "";
 
-    users.forEach(user => {
-        const li = document.createElement("li");
-        li.className = "list-group-item d-flex justify-content-between align-items-center";
-
-        li.innerHTML = `
-            ${user.nom} ${user.prenom}
-            <button class="btn btn-danger btn-sm">X</button>
-        `;
-
-        const deleteBtn = li.querySelector("button");
-
-        deleteBtn.addEventListener("click", async () => {
-            if (confirm("Supprimer cet utilisateur ?")) {
-                await fetch(`/api/users/${user.id}`, {
-                    method: "DELETE"
-                });
-
-                loadUsers();
-                showMessage("Utilisateur supprimé !");
-            }
+        users.forEach(user => {
+            const li = document.createElement("li");
+            li.textContent = `${user.prenom} ${user.nom || ""}`;
+            li.className = "list-group-item";
+            userList.appendChild(li);
         });
-
-        userList.appendChild(li);
-    });
+    } catch (err) {
+        console.error("Erreur lors du chargement des utilisateurs :", err);
+    }
 }
 
-// =============================
-// Ajout utilisateur
-// =============================
+window.addEventListener("DOMContentLoaded", loadUsers);
+
 userForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const nom = document.getElementById("nom").value;
-    const prenom = document.getElementById("prenom").value;
+    const prenom = prenomInput.value.trim();
+    const nom = nomInput.value.trim();
 
-    const response = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ nom, prenom })
-    });
+    if (!prenom) {
+        alert("Le prénom est obligatoire");
+        return;
+    }
 
-    if (response.ok) {
-        userForm.reset();
-        loadUsers();
-        showMessage("Utilisateur ajouté !");
+    try {
+        const res = await fetch("/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prenom, nom })
+        });
+
+        if (res.ok) {
+            loadUsers();
+            prenomInput.value = "";
+            nomInput.value = "";
+        } else {
+            alert("Erreur lors de l'ajout de l'utilisateur");
+        }
+    } catch (err) {
+        console.error("Erreur lors de l'ajout :", err);
     }
 });
-
-// =============================
-// Message Bootstrap
-// =============================
-function showMessage(text) {
-    const messageDiv = document.getElementById("message");
-
-    messageDiv.innerHTML = `
-        <div class="alert alert-success mt-3">
-            ${text}
-        </div>
-    `;
-
-    setTimeout(() => {
-        messageDiv.innerHTML = "";
-    }, 2000);
-}
